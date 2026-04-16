@@ -1,0 +1,1209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3-16 Marine LLC — Inventory Command</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,600;0,6..96,800;1,6..96,400&family=JetBrains+Mono:wght@400;500;700&family=Archivo:wght@400;500;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0a1929;
+    --ink-2: #0f2438;
+    --ink-3: #16304a;
+    --hull: #1a3a5c;
+    --brass: #c9a14a;
+    --brass-bright: #e6c068;
+    --rust: #b8532a;
+    --foam: #f4ede0;
+    --foam-dim: #d8cdb8;
+    --sea: #2d7a8f;
+    --sea-deep: #1a5568;
+    --coral: #e85d3b;
+    --line: rgba(201, 161, 74, 0.25);
+    --line-strong: rgba(201, 161, 74, 0.55);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Archivo', sans-serif;
+    background: var(--ink);
+    color: var(--foam);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(45, 122, 143, 0.15), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(184, 83, 42, 0.08), transparent 50%),
+      repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.008) 2px, rgba(255,255,255,0.008) 4px);
+    letter-spacing: 0.01em;
+  }
+
+  /* ========== HEADER ========== */
+  .masthead {
+    border-bottom: 1px solid var(--line);
+    padding: 32px 48px 24px;
+    position: relative;
+    background: linear-gradient(180deg, var(--ink-2) 0%, var(--ink) 100%);
+  }
+
+  .masthead::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--brass) 0%, var(--brass-bright) 50%, var(--brass) 100%);
+  }
+
+  .mast-grid {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: end;
+    gap: 32px;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .brand-mark {
+    width: 72px; height: 72px;
+    border: 2px solid var(--brass);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: radial-gradient(circle, var(--ink-2) 0%, var(--ink) 100%);
+    flex-shrink: 0;
+  }
+
+  .brand-mark::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+  }
+
+  .brand-mark span {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--brass-bright);
+    font-style: italic;
+    letter-spacing: -0.02em;
+    z-index: 1;
+  }
+
+  .brand-text h1 {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .brand-text h1 em {
+    color: var(--brass-bright);
+    font-style: italic;
+  }
+
+  .brand-text .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--foam-dim);
+    opacity: 0.7;
+  }
+
+  .mast-center {
+    text-align: center;
+    padding-bottom: 4px;
+    position: relative;
+  }
+
+  .mast-center .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.4em;
+    color: var(--brass);
+    margin-bottom: 4px;
+  }
+
+  .mast-center .big {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--foam-dim);
+    font-weight: 400;
+  }
+
+  .shrimp-boat {
+    width: 180px;
+    height: 90px;
+    margin: 4px auto 8px;
+    display: block;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+    animation: bob 4s ease-in-out infinite;
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(-0.5deg); }
+    50% { transform: translateY(-2px) rotate(0.5deg); }
+  }
+
+  .water-line {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 220px;
+    height: 6px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--sea) 0px,
+      var(--sea) 8px,
+      transparent 8px,
+      transparent 14px
+    );
+    opacity: 0.5;
+  }
+
+  .mast-meta {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.8;
+    color: var(--foam-dim);
+  }
+
+  .mast-meta .live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--brass-bright);
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    background: var(--brass-bright);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--brass-bright);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ========== KPI STRIP ========== */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-bottom: 1px solid var(--line);
+    background: var(--ink-2);
+  }
+
+  .kpi {
+    padding: 22px 28px;
+    border-right: 1px solid var(--line);
+    position: relative;
+  }
+
+  .kpi:last-child { border-right: none; }
+
+  .kpi-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--foam-dim);
+    margin-bottom: 8px;
+  }
+
+  .kpi-value {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--foam);
+    margin-bottom: 6px;
+  }
+
+  .kpi-value .small {
+    font-size: 18px;
+    color: var(--brass-bright);
+  }
+
+  .kpi-delta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--sea);
+  }
+
+  .kpi-delta.up { color: #7fb069; }
+  .kpi-delta.down { color: var(--coral); }
+
+  /* ========== MAIN GRID ========== */
+  .main {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 0;
+  }
+
+  .panel {
+    padding: 36px 48px;
+    border-right: 1px solid var(--line);
+  }
+
+  .panel:last-child { border-right: none; }
+
+  .panel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .panel-head h2 {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .panel-head h2 em {
+    color: var(--brass-bright);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .panel-head .count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--foam-dim);
+    letter-spacing: 0.15em;
+  }
+
+  /* ========== INVENTORY TABLE ========== */
+  .inventory {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .inv-header {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px 90px 90px 80px;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--foam-dim);
+    border-bottom: 1px solid var(--line-strong);
+    gap: 12px;
+  }
+
+  .inv-row {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px 90px 90px 80px;
+    padding: 16px 12px;
+    border-bottom: 1px solid var(--line);
+    align-items: center;
+    gap: 12px;
+    transition: background 0.2s;
+    cursor: pointer;
+  }
+
+  .inv-row:hover {
+    background: rgba(201, 161, 74, 0.05);
+  }
+
+  .sku {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--brass);
+    letter-spacing: 0.05em;
+  }
+
+  .part-name {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 3px;
+  }
+
+  .part-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--foam-dim);
+    letter-spacing: 0.05em;
+  }
+
+  .cond {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 4px 8px;
+    border: 1px solid var(--line-strong);
+    border-radius: 2px;
+    text-align: center;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    width: fit-content;
+  }
+
+  .cond.used { color: var(--foam-dim); border-color: var(--line); }
+  .cond.refurb { color: var(--sea); border-color: var(--sea); }
+  .cond.new { color: var(--brass-bright); border-color: var(--brass-bright); }
+
+  .price {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--foam);
+  }
+
+  .qty {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--foam);
+  }
+
+  .status {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .status.listed { color: #7fb069; }
+  .status.draft { color: var(--foam-dim); }
+  .status.sold { color: var(--coral); }
+
+  /* ========== LISTED PANEL ========== */
+  .listed-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .listing-card {
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    padding: 18px 20px;
+    position: relative;
+    transition: all 0.25s;
+  }
+
+  .listing-card:hover {
+    border-color: var(--line-strong);
+    transform: translateX(-2px);
+  }
+
+  .listing-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--brass);
+  }
+
+  .listing-plat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    color: var(--brass);
+    margin-bottom: 6px;
+  }
+
+  .listing-title {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.3;
+    margin-bottom: 10px;
+  }
+
+  .listing-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--line);
+  }
+
+  .stat {
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .stat-label {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--foam-dim);
+    margin-bottom: 2px;
+  }
+
+  .stat-val {
+    font-size: 14px;
+    color: var(--foam);
+    font-weight: 500;
+  }
+
+  .stat-val.accent { color: var(--brass-bright); }
+
+  /* ========== TRENDING SECTION ========== */
+  .trending-section {
+    grid-column: 1 / -1;
+    border-top: 1px solid var(--line);
+    padding: 36px 48px 48px;
+    background:
+      linear-gradient(180deg, rgba(184, 83, 42, 0.04) 0%, transparent 60%),
+      var(--ink);
+  }
+
+  .trending-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .trending-head h2 {
+    font-family: 'Bodoni Moda', serif;
+    font-size: 32px;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+  }
+
+  .trending-head h2 em {
+    color: var(--rust);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .trending-head .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: var(--foam-dim);
+    text-transform: uppercase;
+  }
+
+  .fire-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--rust);
+    letter-spacing: 0.2em;
+    margin-left: 10px;
+    padding: 3px 8px;
+    border: 1px solid var(--rust);
+    border-radius: 2px;
+  }
+
+  .trend-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+
+  .trend-card {
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    padding: 22px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .trend-card:hover {
+    border-color: var(--brass);
+    transform: translateY(-3px);
+  }
+
+  .trend-card::after {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 100px; height: 100px;
+    background: radial-gradient(circle, rgba(184, 83, 42, 0.2), transparent 70%);
+    border-radius: 50%;
+  }
+
+  .trend-rank {
+    font-family: 'Bodoni Moda', serif;
+    font-style: italic;
+    font-size: 54px;
+    font-weight: 800;
+    color: var(--rust);
+    line-height: 0.9;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .trend-name {
+    font-family: 'Archivo', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 6px;
+    line-height: 1.3;
+    position: relative;
+    z-index: 1;
+  }
+
+  .trend-cat {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--foam-dim);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .trend-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+
+  .metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+  }
+
+  .metric .label {
+    color: var(--foam-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 9px;
+  }
+
+  .metric .value {
+    color: var(--foam);
+    font-weight: 500;
+  }
+
+  .metric .value.hot {
+    color: var(--rust);
+    font-weight: 700;
+  }
+
+  .bar {
+    height: 3px;
+    background: var(--ink-3);
+    margin-top: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--rust), var(--brass-bright));
+    transition: width 1s ease-out;
+  }
+
+  /* ========== FOOTER ========== */
+  .footer {
+    border-top: 1px solid var(--line);
+    padding: 20px 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--foam-dim);
+    letter-spacing: 0.15em;
+    background: var(--ink-2);
+  }
+
+  .footer .compass {
+    display: flex;
+    gap: 14px;
+  }
+
+  .footer .compass span em {
+    color: var(--brass);
+    font-style: normal;
+  }
+
+  @media (max-width: 1100px) {
+    .main { grid-template-columns: 1fr; }
+    .panel { border-right: none; border-bottom: 1px solid var(--line); }
+    .trend-grid { grid-template-columns: repeat(2, 1fr); }
+    .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+    .kpi:nth-child(2) { border-right: none; }
+    .kpi:nth-child(1), .kpi:nth-child(2) { border-bottom: 1px solid var(--line); }
+  }
+
+  @media (max-width: 640px) {
+    .masthead, .panel, .trending-section, .footer { padding-left: 20px; padding-right: 20px; }
+    .mast-grid { grid-template-columns: 1fr; gap: 16px; }
+    .mast-meta { text-align: left; }
+    .inv-header, .inv-row { grid-template-columns: 70px 1fr 70px; }
+    .inv-header > div:nth-child(n+4), .inv-row > div:nth-child(n+4) { display: none; }
+    .trend-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="mast-grid">
+    <div class="brand">
+      <div class="brand-mark"><span>3·16</span></div>
+      <div class="brand-text">
+        <h1>3-16 <em>Marine</em> LLC</h1>
+        <div class="tag">Parts · Inventory · Commerce</div>
+      </div>
+    </div>
+    <div class="mast-center">
+      <div class="eyebrow">— Inventory Command —</div>
+      <svg class="shrimp-boat" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outriggers / booms (rigged up, classic shrimper pose) -->
+        <g stroke="#3a2817" stroke-width="1.2" stroke-linecap="round" fill="none">
+          <!-- Left outrigger -->
+          <line x1="95" y1="38" x2="28" y2="68"/>
+          <!-- Right outrigger -->
+          <line x1="105" y1="38" x2="172" y2="68"/>
+          <!-- Rigging lines from mast to outrigger tips -->
+          <line x1="100" y1="12" x2="28" y2="68" stroke-width="0.4" opacity="0.7"/>
+          <line x1="100" y1="12" x2="172" y2="68" stroke-width="0.4" opacity="0.7"/>
+        </g>
+
+        <!-- Nets hanging from outriggers -->
+        <g fill="none" stroke="#8a7a5c" stroke-width="0.3" opacity="0.7">
+          <!-- Left net -->
+          <path d="M 28 68 Q 32 78 38 82 L 50 78 L 55 66" fill="rgba(138, 122, 92, 0.15)"/>
+          <line x1="30" y1="70" x2="36" y2="80"/>
+          <line x1="34" y1="69" x2="42" y2="81"/>
+          <line x1="38" y1="68" x2="48" y2="79"/>
+          <line x1="44" y1="67" x2="52" y2="75"/>
+          <!-- Right net -->
+          <path d="M 172 68 Q 168 78 162 82 L 150 78 L 145 66" fill="rgba(138, 122, 92, 0.15)"/>
+          <line x1="170" y1="70" x2="164" y2="80"/>
+          <line x1="166" y1="69" x2="158" y2="81"/>
+          <line x1="162" y1="68" x2="152" y2="79"/>
+          <line x1="156" y1="67" x2="148" y2="75"/>
+        </g>
+
+        <!-- Main mast -->
+        <line x1="100" y1="10" x2="100" y2="52" stroke="#3a2817" stroke-width="1.8" stroke-linecap="round"/>
+
+        <!-- Antenna on top -->
+        <line x1="100" y1="10" x2="100" y2="4" stroke="#c9a14a" stroke-width="0.8"/>
+        <circle cx="100" cy="3" r="1" fill="#e6c068"/>
+
+        <!-- Radar/light on mast -->
+        <rect x="97" y="18" width="6" height="3" fill="#c9a14a" rx="0.5"/>
+
+        <!-- Pilot house / wheelhouse -->
+        <rect x="82" y="40" width="36" height="20" fill="#f4ede0" stroke="#3a2817" stroke-width="0.8"/>
+        <!-- Wheelhouse roof trim -->
+        <rect x="80" y="38" width="40" height="3" fill="#b8532a" stroke="#3a2817" stroke-width="0.5"/>
+        <!-- Windows -->
+        <rect x="86" y="44" width="8" height="7" fill="#2d7a8f" stroke="#3a2817" stroke-width="0.4"/>
+        <rect x="96" y="44" width="8" height="7" fill="#2d7a8f" stroke="#3a2817" stroke-width="0.4"/>
+        <rect x="106" y="44" width="8" height="7" fill="#2d7a8f" stroke="#3a2817" stroke-width="0.4"/>
+        <!-- Door -->
+        <rect x="99" y="52" width="4" height="8" fill="#3a2817"/>
+
+        <!-- Hull (main body) - classic shrimper white hull with red trim -->
+        <path d="M 38 60 L 162 60 L 155 80 L 45 80 Z" fill="#f4ede0" stroke="#3a2817" stroke-width="1"/>
+        <!-- Red hull stripe -->
+        <path d="M 40 70 L 160 70 L 158 74 L 42 74 Z" fill="#b8532a"/>
+
+        <!-- Bow detail -->
+        <path d="M 38 60 Q 32 70 45 80" fill="#f4ede0" stroke="#3a2817" stroke-width="1"/>
+
+        <!-- Deck railings -->
+        <line x1="45" y1="60" x2="82" y2="60" stroke="#3a2817" stroke-width="0.5"/>
+        <line x1="118" y1="60" x2="155" y2="60" stroke="#3a2817" stroke-width="0.5"/>
+
+        <!-- Boat name plate -->
+        <rect x="75" y="72" width="50" height="4" fill="#0a1929" opacity="0.3"/>
+
+        <!-- Small tire bumpers on side -->
+        <circle cx="60" cy="72" r="2" fill="#1a1a1a" stroke="#3a2817" stroke-width="0.3"/>
+        <circle cx="140" cy="72" r="2" fill="#1a1a1a" stroke="#3a2817" stroke-width="0.3"/>
+
+        <!-- Water splash at bow -->
+        <g fill="#c9a14a" opacity="0.6">
+          <ellipse cx="35" cy="82" rx="3" ry="1"/>
+          <ellipse cx="30" cy="84" rx="2" ry="0.8"/>
+        </g>
+
+        <!-- Seagull silhouettes -->
+        <g fill="none" stroke="#d8cdb8" stroke-width="0.6" stroke-linecap="round">
+          <path d="M 35 22 Q 38 19 41 22 Q 44 19 47 22"/>
+          <path d="M 160 16 Q 162 14 164 16 Q 166 14 168 16"/>
+        </g>
+      </svg>
+      <div class="big">Orange Beach, Alabama</div>
+    </div>
+    <div class="mast-meta">
+      <div class="live"><span class="dot"></span> LIVE · APR 16 2026</div>
+      <div>14:22 CDT</div>
+      <div>OPERATOR: DANIEL</div>
+    </div>
+  </div>
+</header>
+
+<section class="kpi-strip">
+  <div class="kpi">
+    <div class="kpi-label">Total Inventory</div>
+    <div class="kpi-value">247<span class="small"> units</span></div>
+    <div class="kpi-delta up">▲ 12 this week</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Active Listings</div>
+    <div class="kpi-value">89</div>
+    <div class="kpi-delta up">▲ 4 new today</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Sold · 30d</div>
+    <div class="kpi-value"><span class="small">$</span>14,820</div>
+    <div class="kpi-delta up">▲ 23% vs prior</div>
+  </div>
+  <div class="kpi">
+    <div class="kpi-label">Avg. Sell Days</div>
+    <div class="kpi-value">11<span class="small"> days</span></div>
+    <div class="kpi-delta down">▼ 2d faster</div>
+  </div>
+</section>
+
+<main class="main">
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Current <em>Inventory</em></h2>
+      <div class="count">SHOWING 8 OF 247</div>
+    </div>
+
+    <div class="inventory">
+      <div class="inv-header">
+        <div>SKU</div>
+        <div>Part</div>
+        <div>Condition</div>
+        <div>Price</div>
+        <div>Qty</div>
+        <div>Status</div>
+      </div>
+
+      <div class="inv-row">
+        <div class="sku">316-0142</div>
+        <div>
+          <div class="part-name">Mercury 50-859170 Starter Motor</div>
+          <div class="part-meta">FITS 40-60HP 4-STROKE · 2002-2015</div>
+        </div>
+        <div><span class="cond refurb">Refurb</span></div>
+        <div class="price">$189</div>
+        <div class="qty">×2</div>
+        <div class="status listed">Listed</div>
+      </div>
+
+      <div class="inv-row">
+        <div class="sku">316-0138</div>
+        <div>
+          <div class="part-name">Yamaha 6E5-45501-00 Lower Unit</div>
+          <div class="part-meta">FITS V6 150-225HP · 1990-2004</div>
+        </div>
+        <div><span class="cond used">Used</span></div>
+        <div class="price">$845</div>
+        <div class="qty">×1</div>
+        <div class="status listed">Listed</div>
+      </div>
+
+      <div class="inv-row">
+        <div class="sku">316-0127</div>
+        <div>
+          <div class="part-name">Evinrude 586767 Power Pack</div>
+          <div class="part-meta">FITS 90-175HP FICHT · 1996-2001</div>
+        </div>
+        <div><span class="cond refurb">Refurb</span></div>
+        <div class="price">$275</div>
+        <div class="qty">×3</div>
+        <div class="status draft">Draft</div>
+      </div>
+
+      <div class="inv-row">
+        <div class="sku">316-0115</div>
+        <div>
+          <div class="part-name">Mercury 881170T02 Trim &amp; Tilt Motor</div>
+          <div class="part-meta">FITS 75-250HP VERADO · 2004-2018</div>
+        </div>
+        <div><span class="cond new">New OEM</span></div>
+        <div class="price">$395</div>
+        <div class="qty">×1</div>
+        <div class="status listed">Listed</div>
+      </div>
+
+      <div class="inv-row">
+        <div class="sku">316-0109</div>
+        <div>
+          <div class="part-name">Yamaha 6H3-W0093-00 Water Pump Kit</div>
+          <div class="part-meta">FITS 60-90HP 2-STROKE · 1984-2006</div>
+        </div>
+        <div><span class="cond new">New</span></div>
+        <div class="price">$64</div>
+        <div class="qty">×8</div>
+        <div class="status listed">Listed</div>
+      </div>
+
+      <div class="inv-row">
+        <div class="sku">316-0098</div>
+        <div>
+          <div class="part-name">Johnson 0586769 CDI Ignition Module</div>
+          <div class="part-meta">FITS 40-50HP · 1995-2005</div>
+        </div>
+        <div><span class="cond used">Used</span></div>
+        <div class="price">$125</div>
+        <div class="qty">×2</div>
+        <div class="status draft">Draft</div>
+      </div>
+
+      <div class="inv-row">
+        <div class="sku">316-0091</div>
+        <div>
+          <div class="part-name">Mercury 893110T01 Voltage Regulator</div>
+          <div class="part-meta">FITS 30-60HP EFI · 2006-2020</div>
+        </div>
+        <div><span class="cond refurb">Refurb</span></div>
+        <div class="price">$89</div>
+        <div class="qty">×4</div>
+        <div class="status listed">Listed</div>
+      </div>
+
+      <div class="inv-row">
+        <div class="sku">316-0084</div>
+        <div>
+          <div class="part-name">Yamaha 68V-14301-00 Carburetor Assembly</div>
+          <div class="part-meta">FITS F115 4-STROKE · 2000-2013</div>
+        </div>
+        <div><span class="cond used">Used</span></div>
+        <div class="price">$220</div>
+        <div class="qty">×1</div>
+        <div class="status sold">Sold</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h2>Listed <em>Now</em></h2>
+      <div class="count">ACROSS 3 PLATFORMS</div>
+    </div>
+
+    <div class="listed-stack">
+
+      <div class="listing-card">
+        <div class="listing-plat">eBay · Motors</div>
+        <div class="listing-title">Mercury 50-859170 Starter Motor Refurbished</div>
+        <div class="listing-stats">
+          <div class="stat">
+            <div class="stat-label">Views</div>
+            <div class="stat-val">342</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Watchers</div>
+            <div class="stat-val accent">18</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Days</div>
+            <div class="stat-val">4</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="listing-card">
+        <div class="listing-plat">eBay · Motors</div>
+        <div class="listing-title">Yamaha 6E5 Lower Unit V6 150-225HP</div>
+        <div class="listing-stats">
+          <div class="stat">
+            <div class="stat-label">Views</div>
+            <div class="stat-val">891</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Watchers</div>
+            <div class="stat-val accent">34</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Days</div>
+            <div class="stat-val">9</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="listing-card">
+        <div class="listing-plat">Facebook Marketplace</div>
+        <div class="listing-title">Mercury Verado Power Trim &amp; Tilt — OEM</div>
+        <div class="listing-stats">
+          <div class="stat">
+            <div class="stat-label">Views</div>
+            <div class="stat-val">156</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Messages</div>
+            <div class="stat-val accent">7</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Days</div>
+            <div class="stat-val">2</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="listing-card">
+        <div class="listing-plat">eBay · Motors</div>
+        <div class="listing-title">Yamaha Water Pump Kit 60-90HP 2-Stroke</div>
+        <div class="listing-stats">
+          <div class="stat">
+            <div class="stat-label">Views</div>
+            <div class="stat-val">428</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Watchers</div>
+            <div class="stat-val accent">22</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Days</div>
+            <div class="stat-val">6</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="listing-card">
+        <div class="listing-plat">Mercari</div>
+        <div class="listing-title">Mercury EFI Voltage Regulator 893110T01</div>
+        <div class="listing-stats">
+          <div class="stat">
+            <div class="stat-label">Views</div>
+            <div class="stat-val">98</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Likes</div>
+            <div class="stat-val accent">5</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Days</div>
+            <div class="stat-val">11</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="trending-section">
+    <div class="trending-head">
+      <h2>Trending <em>Hot</em> Purchased <span class="fire-badge">🔥 HOT</span></h2>
+      <div class="sub">What's Moving Right Now · Last 14 Days</div>
+    </div>
+
+    <div class="trend-grid">
+
+      <div class="trend-card">
+        <div class="trend-rank">01</div>
+        <div class="trend-name">Mercury Outboard Starters</div>
+        <div class="trend-cat">Electrical · 40-150HP</div>
+        <div class="trend-metrics">
+          <div class="metric">
+            <span class="label">Sold</span>
+            <span class="value hot">147 UNITS</span>
+          </div>
+          <div class="metric">
+            <span class="label">Avg Price</span>
+            <span class="value">$184</span>
+          </div>
+          <div class="metric">
+            <span class="label">Sell Velocity</span>
+            <span class="value hot">3.2 DAYS</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width: 95%"></div></div>
+        </div>
+      </div>
+
+      <div class="trend-card">
+        <div class="trend-rank">02</div>
+        <div class="trend-name">Yamaha Lower Units</div>
+        <div class="trend-cat">Drivetrain · V6 Series</div>
+        <div class="trend-metrics">
+          <div class="metric">
+            <span class="label">Sold</span>
+            <span class="value hot">82 UNITS</span>
+          </div>
+          <div class="metric">
+            <span class="label">Avg Price</span>
+            <span class="value">$895</span>
+          </div>
+          <div class="metric">
+            <span class="label">Sell Velocity</span>
+            <span class="value">6.4 DAYS</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width: 78%"></div></div>
+        </div>
+      </div>
+
+      <div class="trend-card">
+        <div class="trend-rank">03</div>
+        <div class="trend-name">Power Trim &amp; Tilt Motors</div>
+        <div class="trend-cat">Hydraulic · All Brands</div>
+        <div class="trend-metrics">
+          <div class="metric">
+            <span class="label">Sold</span>
+            <span class="value hot">118 UNITS</span>
+          </div>
+          <div class="metric">
+            <span class="label">Avg Price</span>
+            <span class="value">$340</span>
+          </div>
+          <div class="metric">
+            <span class="label">Sell Velocity</span>
+            <span class="value hot">4.1 DAYS</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width: 88%"></div></div>
+        </div>
+      </div>
+
+      <div class="trend-card">
+        <div class="trend-rank">04</div>
+        <div class="trend-name">CDI / Power Packs</div>
+        <div class="trend-cat">Ignition · Evinrude/Johnson</div>
+        <div class="trend-metrics">
+          <div class="metric">
+            <span class="label">Sold</span>
+            <span class="value">64 UNITS</span>
+          </div>
+          <div class="metric">
+            <span class="label">Avg Price</span>
+            <span class="value">$248</span>
+          </div>
+          <div class="metric">
+            <span class="label">Sell Velocity</span>
+            <span class="value">7.8 DAYS</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width: 65%"></div></div>
+        </div>
+      </div>
+
+      <div class="trend-card">
+        <div class="trend-rank">05</div>
+        <div class="trend-name">Water Pump Kits</div>
+        <div class="trend-cat">Cooling · Yamaha/Merc</div>
+        <div class="trend-metrics">
+          <div class="metric">
+            <span class="label">Sold</span>
+            <span class="value">201 UNITS</span>
+          </div>
+          <div class="metric">
+            <span class="label">Avg Price</span>
+            <span class="value">$58</span>
+          </div>
+          <div class="metric">
+            <span class="label">Sell Velocity</span>
+            <span class="value hot">2.1 DAYS</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width: 92%"></div></div>
+        </div>
+      </div>
+
+      <div class="trend-card">
+        <div class="trend-rank">06</div>
+        <div class="trend-name">4-Stroke Carburetors</div>
+        <div class="trend-cat">Fuel · Yamaha F-Series</div>
+        <div class="trend-metrics">
+          <div class="metric">
+            <span class="label">Sold</span>
+            <span class="value">53 UNITS</span>
+          </div>
+          <div class="metric">
+            <span class="label">Avg Price</span>
+            <span class="value">$215</span>
+          </div>
+          <div class="metric">
+            <span class="label">Sell Velocity</span>
+            <span class="value">9.2 DAYS</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width: 58%"></div></div>
+        </div>
+      </div>
+
+      <div class="trend-card">
+        <div class="trend-rank">07</div>
+        <div class="trend-name">Voltage Regulators</div>
+        <div class="trend-cat">Electrical · EFI Models</div>
+        <div class="trend-metrics">
+          <div class="metric">
+            <span class="label">Sold</span>
+            <span class="value">77 UNITS</span>
+          </div>
+          <div class="metric">
+            <span class="label">Avg Price</span>
+            <span class="value">$95</span>
+          </div>
+          <div class="metric">
+            <span class="label">Sell Velocity</span>
+            <span class="value">5.6 DAYS</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width: 72%"></div></div>
+        </div>
+      </div>
+
+      <div class="trend-card">
+        <div class="trend-rank">08</div>
+        <div class="trend-name">Propellers · Stainless</div>
+        <div class="trend-cat">Drive · 13-16" Pitch</div>
+        <div class="trend-metrics">
+          <div class="metric">
+            <span class="label">Sold</span>
+            <span class="value">41 UNITS</span>
+          </div>
+          <div class="metric">
+            <span class="label">Avg Price</span>
+            <span class="value">$310</span>
+          </div>
+          <div class="metric">
+            <span class="label">Sell Velocity</span>
+            <span class="value">8.4 DAYS</span>
+          </div>
+          <div class="bar"><div class="bar-fill" style="width: 52%"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div>3-16 MARINE LLC · ORANGE BEACH, AL</div>
+  <div class="compass">
+    <span>N <em>30.29°</em></span>
+    <span>W <em>87.56°</em></span>
+    <span>WIND <em>SE 8KT</em></span>
+    <span>TIDE <em>RISING</em></span>
+  </div>
+  <div>v1.0 · PROTOTYPE</div>
+</footer>
+
+</body>
+</html>
